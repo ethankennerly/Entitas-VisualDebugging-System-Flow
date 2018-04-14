@@ -35,8 +35,10 @@ What ideas do you have to quickly and automatically visualize the relationships 
 1. Engineer installs Entitas-Csharp with visual debugging.
 1. Engineer does not disable Entitas visual debugging.
 1. Engineer programs a game using two or more reactive systems of Entitas.  Example:  see Deadly Diver <https://github.com/ethankennerly/ludumdare40>
-1. [ ] Engineer installs this repo into their `Assets` path.  For example:  see Deadly Diver.
-1. [ ] In each system file, engineer replaces text `ReactiveSystem` with `ObservableReactiveSystem`.
+1. [x] Engineer installs this repo into their `Assets` path.  For example:  see Deadly Diver.
+1. [x] Engineer replaces text of `ReactiveSystem` with `ObservableReactiveSystem`.
+    1. [x] Engineer inserts call to base class execute:  `base.Execute(entities);`
+        - [ ] An alternative implementation that would avoid the middleman class would be if Entitas exposed `entity.OnEntityRetained` event.
 1. [ ] In the Unity editor, engineer drags prefab `Debug System Flow Observer` into the scene or creates one.
     1. [ ] If camera size is 5 (by default) then the height is 10.
     1. [ ] Engineer sets the x-position of the debug system flow to be 20 to be certainly offscreen to the right.
@@ -47,7 +49,8 @@ What ideas do you have to quickly and automatically visualize the relationships 
             1. [ ] The system prefab has Unity text mesh linking its name.
         1. [ ] Engineer assigns the entity prefab, which is how the system will appear.
             1. [ ] The entity prefab has Unity text mesh linking its name.
-        1. [ ] Text mesh and world space are used instead of UI.
+        1. [ ] Engineer may use text mesh and world space of canvas for faster performance.
+        1. [ ] Engineer links system positions as many as are needed, manually placing them.
     1. Engineer saves scene.
 
 ### Usage
@@ -60,6 +63,8 @@ What ideas do you have to quickly and automatically visualize the relationships 
         1. [ ] Each system game object is a child of (and centered around) the root flow observer.
         1. [ ] A game object named "No System" is created at the top.
         1. [ ] Each system is translucent by playing an animation, which represents the system has not been executed yet.
+        1. [ ] Flow observer searches through debug systems for systems.
+            1. [ ] For each system, observer adds event to the collector's groups.
     1. [ ] In hierarchy window, engineer clicks `Debug System Flow Observer`.
         1. [ ] Entitas entity game objects are located at "No System".
         1. [ ] Engineer plays game and triggers a system to execute an entity.  For example in Deadly Diver, click a location on screen.
@@ -68,3 +73,11 @@ What ideas do you have to quickly and automatically visualize the relationships 
             1. [ ] Over time, animation gradually fades.
             1. [ ] Debug system flow observer draws debug line with two halves`.
             1. [ ] Debug system writes on line near destination the name of the entity at the time of transition.
+    1. [ ] Engineer edits positions of systems to read the diagram.
+        1. [ ] Lines redraw to new positions.
+        1. [ ] Texts snap to new positions.
+        1. [ ] Engineer selects menu `Tools / Entitas / Visual Debugging / System Flow / Save Prefab`
+        1. [ ] Engineer adds and removes systems.
+        1. [ ] Next time, those systems will appear at those locations.
+        1. [ ] Removed systems disappear and are skipped.
+        1. [ ] Overflowing systems are added downscreen from last system.
