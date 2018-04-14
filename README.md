@@ -44,21 +44,21 @@ What ideas do you have to quickly and automatically visualize the relationships 
     1. [x] If camera size is 5 (by default) then the height is 10.
     1. [x] Engineer sets the x-position of the debug system flow to be 20 to be certainly offscreen to the right.
     1. [x] If the camera will move, engineer places the flow observer somewhere out of view.
-1. [ ] If creating a system flow prefab in the Unity editor:
+1. [x] If creating a system flow prefab in the Unity editor:
     1. [x] Engineer attaches component: `Debug System Flow Observer`
         1. [x] Engineer assigns the system prefab, which is how the system will appear.
             1. [x] The system prefab has Unity text mesh linking its name.
         1. [x] Engineer assigns the entity prefab, which is how the system will appear.
             1. [x] The entity prefab has Unity text mesh linking its name.
         1. [x] Engineer may use text mesh and world space instead of canvas for faster performance.
-        1. [ ] Engineer links system positions as many as are needed, manually placing them.
+        1. [x] Engineer links system positions as many as are needed, manually placing them.
     1. Engineer saves scene.
 
 ### Usage
 
 1. [ ] In the Unity editor, engineer plays.  Entitas visual debugging is disabled outside the editor.
-    1. [ ] Debug system flow observer does not destroy on load.
-    1. [ ] Debug system flow observer moves debug systems to not destroy on load.
+    1. [x] Debug system flow observer does not destroy on load.
+    1. [x] Debug system flow observer moves debug systems behaviour to not destroy on load.
     1. [ ] Debug system flow observer constructs a game object for each terminal system.
         1. [ ] Each game object has the name of the system and is in a circle, clockwise by execution order.
         1. [ ] Each system game object is a child of (and centered around) the root flow observer.
