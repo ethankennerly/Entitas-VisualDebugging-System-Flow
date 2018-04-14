@@ -32,24 +32,25 @@ What ideas do you have to quickly and automatically visualize the relationships 
 
 ### Installation
 
-1. Engineer installs Entitas-Csharp with visual debugging.
+1. Engineer installs Entitas-Csharp with visual debugging.  <https://github.com/sschmid/Entitas-CSharp>
 1. Engineer does not disable Entitas visual debugging.
 1. Engineer programs a game using two or more reactive systems of Entitas.  Example:  see Deadly Diver <https://github.com/ethankennerly/ludumdare40>
 1. [x] Engineer installs this repo into their `Assets` path.  For example:  see Deadly Diver.
 1. [x] Engineer replaces text of `ReactiveSystem` with `ObservableReactiveSystem`.
     1. [x] Engineer inserts call to base class execute:  `base.Execute(entities);`
-        - [ ] An alternative implementation that would avoid the middleman class would be if Entitas exposed `entity.OnEntityRetained` event.
-1. [ ] In the Unity editor, engineer drags prefab `Debug System Flow Observer` into the scene or creates one.
-    1. [ ] If camera size is 5 (by default) then the height is 10.
-    1. [ ] Engineer sets the x-position of the debug system flow to be 20 to be certainly offscreen to the right.
-    1. [ ] If the camera will move, engineer places the flow observer somewhere out of view.
-1. [ ] In the Unity editor, engineer creates debug system flow game object.
-    1. [ ] Engineer attaches component: `Debug System Flow Observer`
-        1. [ ] Engineer assigns the system prefab, which is how the system will appear.
-            1. [ ] The system prefab has Unity text mesh linking its name.
-        1. [ ] Engineer assigns the entity prefab, which is how the system will appear.
-            1. [ ] The entity prefab has Unity text mesh linking its name.
-        1. [ ] Engineer may use text mesh and world space of canvas for faster performance.
+        - An alternative implementation that would avoid the middleman class would be if Entitas implemented an `entity.OnEntityRetained` event.
+        - When a reactive system executes an entity, the system retains the entity.
+1. [x] In the Unity editor, engineer drags prefab `DebugSystemFlowObserver` into the scene or creates one.
+    1. [x] If camera size is 5 (by default) then the height is 10.
+    1. [x] Engineer sets the x-position of the debug system flow to be 20 to be certainly offscreen to the right.
+    1. [x] If the camera will move, engineer places the flow observer somewhere out of view.
+1. [ ] If creating a system flow prefab in the Unity editor:
+    1. [x] Engineer attaches component: `Debug System Flow Observer`
+        1. [x] Engineer assigns the system prefab, which is how the system will appear.
+            1. [x] The system prefab has Unity text mesh linking its name.
+        1. [x] Engineer assigns the entity prefab, which is how the system will appear.
+            1. [x] The entity prefab has Unity text mesh linking its name.
+        1. [x] Engineer may use text mesh and world space instead of canvas for faster performance.
         1. [ ] Engineer links system positions as many as are needed, manually placing them.
     1. Engineer saves scene.
 
@@ -81,3 +82,6 @@ What ideas do you have to quickly and automatically visualize the relationships 
         1. [ ] Next time, those systems will appear at those locations.
         1. [ ] Removed systems disappear and are skipped.
         1. [ ] Overflowing systems are added downscreen from last system.
+
+
+Coding style follows Entitas-CSharp.
