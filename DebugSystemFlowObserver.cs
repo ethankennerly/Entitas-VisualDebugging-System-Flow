@@ -1,6 +1,8 @@
+using Entitas;
 using UnityEngine;
 
 namespace Entitas.VisualDebugging.Unity {
+    /// For context, please see README.md
     public sealed class DebugSystemFlowObserver : MonoBehaviour {
 
         public GameObject systemPrefab;
@@ -8,19 +10,26 @@ namespace Entitas.VisualDebugging.Unity {
 
         public Transform[] systemPositions;
 
-        private void Start()
-        {
-            DontDestroyOnLoad();
+        DebugSystemsBehaviour _systemsBehaviour;
+
+        SystemEntityWillBeExecuted _snapEntityObserver;
+
+        void Start() {
+            _snapEntityObserver = snapEntityObserverToSystem;
+            _systemsBehaviour = FindObjectOfType<DebugSystemsBehaviour>();
+            DontDestroyOnLoad(gameObject);
+            DontDestroyOnLoad(_systemsBehaviour.gameObject);
+
+            ObservableSystem.OnEntityWillBeExecuted -= _snapEntityObserver;
+            ObservableSystem.OnEntityWillBeExecuted += _snapEntityObserver;
         }
 
-        private void DontDestroyOnLoad()
-        {
-            DontDestroyOnLoad(gameObject);
-            DebugSystemsBehaviour[] systems = FindObjectsOfType<DebugSystemsBehaviour>();
-            foreach (var system in systems)
-            {
-                DontDestroyOnLoad(system.gameObject);
-            }
+        void OnDestroy() {
+            ObservableSystem.OnEntityWillBeExecuted -= _snapEntityObserver;
+        }
+
+        void snapEntityObserverToSystem(IEntity entity, ISystem system) {
+            Debug.Log("snapEntityObserverToSystem: TODO entity " + entity + " system " + system);
         }
     }
 }
