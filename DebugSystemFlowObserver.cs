@@ -102,6 +102,7 @@ namespace Entitas.VisualDebugging.Unity {
                     string name = system == null ? nullSystemName : system.ToString();
                     observer.name = name;
                     observer.nameText.text = name;
+                    systemPosition.name = name;
                 }
                 if (system == null) {
                     nullSystemTransform = systemPosition;
@@ -145,6 +146,8 @@ namespace Entitas.VisualDebugging.Unity {
                     init();
                 }
                 systemTransform = _systems[system].transform;
+                var systemObserver = _systems[system];
+                systemObserver.Execute();
             }
             _entities[entity.creationIndex].transform.position = systemTransform.position;
         }

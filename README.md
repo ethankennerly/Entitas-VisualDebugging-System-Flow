@@ -59,20 +59,21 @@ What ideas do you have to quickly and automatically visualize the relationships 
 1. [ ] In the Unity editor, engineer plays.  Entitas visual debugging is disabled outside the editor.
     1. [x] Debug system flow observer does not destroy on load.
     1. [x] Debug system flow observer moves debug systems behaviour to not destroy on load.
-    1. [ ] Debug system flow observer constructs a game object for each terminal system.
-        1. [ ] Each game object has the name of the system and is in a circle, clockwise by execution order.
-        1. [ ] Each system game object is a child of (and centered around) the root flow observer.
-        1. [ ] A game object named "No System" is created at the top.
-        1. [ ] Each system is translucent by playing an animation, which represents the system has not been executed yet.
-        1. [ ] Flow observer searches through debug systems for systems.
-            1. [ ] For each system, observer adds event to the collector's groups.
+    1. [x] Debug system flow observer constructs a game object for each terminal system.
+        1. [x] Each game object has the name of the system and is in a circle, clockwise by execution order.
+        1. [x] Each system game object is a child of (and centered around) the root flow observer.
+        1. [x] A game object named "No System" is created at the bottom.
+        1. [x] Each system is translucent by playing an animation, which represents the system has not been executed yet.
+        1. [x] Flow observer searches through debug systems for systems.
+            1. [x] For each system, observer adds event to the collector's groups.
     1. [ ] In hierarchy window, engineer clicks `Debug System Flow Observer`.
-        1. [ ] Entitas entity game objects are located at "No System".
-        1. [ ] Engineer plays game and triggers a system to execute an entity.  For example in Deadly Diver, click a location on screen.
-            1. [ ] Debug system flow observer moves entity game object to the system game objects.
-            1. [ ] Debug system makes system sprite opaque by playing an animation.
-            1. [ ] Over time, animation gradually fades.
-            1. [ ] Debug system flow observer draws debug line with two halves`.
+        1. [x] Entitas entity game objects are located at "No System".
+        1. [x] Engineer plays game and triggers a system to execute an entity.  For example in Deadly Diver, click a location on screen.
+            1. [x] Debug system flow observer moves entity game object to the system game objects.
+            1. [x] Debug system makes system sprite opaque by playing an animation.
+            1. [x] Over time, system animation gradually fades.
+            1. [ ] Similarly, entity animates when executed.
+            1. [ ] Debug system flow observer draws debug line with two halves.
             1. [ ] Debug system writes on line near destination the name of the entity at the time of transition.
     1. [ ] Engineer edits positions of systems to read the diagram.
         1. [ ] Lines redraw to new positions.
