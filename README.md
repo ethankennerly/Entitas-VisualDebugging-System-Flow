@@ -79,7 +79,10 @@ What ideas do you have to quickly and automatically visualize the relationships 
             1. [x] Likewise, entity animates when executed.
             1. [x] System observer acquires entity behaviour as parent.
             1. [x] Debug system flow observer draws debug line from entity's current position to system.
+            1. [x] Distinguishes between entities of differing contexts.
             1. [ ] Debug system writes on line near destination the name of the entity at the time of transition.
+            1. [ ] As entity moves, bring it forward towards the camera, so newest entity is on top.
+            1. [ ] Slightly offset each entity's position to prevent a total eclipse.
 
 
 Coding style follows Entitas-CSharp.

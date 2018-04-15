@@ -22,13 +22,17 @@ namespace Entitas.VisualDebugging.Unity {
         // Caches delegate to avoid garbage each call.
         SystemEntityWillBeExecuted _snapEntityToSystem;
 
+        EntityEvent _onDestroyEntity;
+        EntityComponentChanged _onEntityChanged;
+
         DebugSystemsBehaviour _systemsBehaviour;
 
-        readonly Dictionary<int, EntityBehaviour> _entities = new Dictionary<int, EntityBehaviour>();
+        readonly Dictionary<string, Dictionary<int, EntityBehaviour>> _contextEntities = new Dictionary<string, Dictionary<int, EntityBehaviour>>();
         readonly Dictionary<ISystem, DebugSystemObserver> _systems = new Dictionary<ISystem, DebugSystemObserver>();
 
         const string nullSystemName = "No System";
         Transform nullSystemTransform;
+
 
         void Start() {
             init();
@@ -39,6 +43,8 @@ namespace Entitas.VisualDebugging.Unity {
         }
 
         void init() {
+            _onDestroyEntity = destroyEntity;
+            _onEntityChanged = updateEntityName;
             _snapEntityToSystem = snapEntityToSystem;
             _systemsBehaviour = FindObjectOfType<DebugSystemsBehaviour>();
             DontDestroyOnLoad(gameObject);
@@ -46,7 +52,7 @@ namespace Entitas.VisualDebugging.Unity {
 
             mapEntitiesToBehaviours(FindObjectsOfType<EntityBehaviour>());
             createSystems(_systemsBehaviour.systems.executeSystemInfos);
-            snapEntitiesToSystem(_entities, null);
+            snapEntitiesToSystem(_contextEntities, null);
 
             ObservableSystem.OnEntityWillBeExecuted -= _snapEntityToSystem;
             ObservableSystem.OnEntityWillBeExecuted += _snapEntityToSystem;
@@ -59,12 +65,56 @@ namespace Entitas.VisualDebugging.Unity {
         }
 
         void createEntity(IEntity entity, EntityBehaviour behaviour) {
-            _entities[entity.creationIndex] = behaviour;
+            string contextName = entity.contextInfo.name;
+            if (!_contextEntities.ContainsKey(contextName)) {
+                _contextEntities[contextName] = new Dictionary<int, EntityBehaviour>();
+            }
+            _contextEntities[contextName][entity.creationIndex] = behaviour;
             var observerObject = Instantiate(entityPrefab, behaviour.transform);
             var observer = observerObject.GetComponent<DebugEntityObserver>();
             if (observer != null) {
-                observer.name = entity.ToString();
-                observer.nameText.text = entity.ToString();
+                string name = describeEntity(entity);
+                observer.name = name;
+                observer.nameText.text = name;
+            }
+            entity.OnDestroyEntity -= _onDestroyEntity;
+            entity.OnDestroyEntity += _onDestroyEntity;
+            entity.OnComponentAdded -= _onEntityChanged;
+            entity.OnComponentAdded += _onEntityChanged;
+            entity.OnComponentRemoved -= _onEntityChanged;
+            entity.OnComponentRemoved += _onEntityChanged;
+        }
+
+        void destroyEntity(IEntity entity) {
+            string contextName = entity.contextInfo.name;
+            if (!_contextEntities.ContainsKey(contextName)) {
+                return;
+            }
+            int entityId = entity.creationIndex;
+            var entities = _contextEntities[contextName];
+            if (entities.ContainsKey(entityId)) {
+                var behaviour = entities[entityId];
+                entities.Remove(entityId);
+                Destroy(behaviour.gameObject);
+            }
+        }
+
+        void updateEntityName(IEntity entity, int index, IComponent component) {
+            updateEntity(entity);
+        }
+
+        void updateEntity(IEntity entity) {
+            string contextName = entity.contextInfo.name;
+            if (!_contextEntities.ContainsKey(contextName)) {
+                return;
+            }
+            int entityId = entity.creationIndex;
+            var entities = _contextEntities[contextName];
+            var entityBehaviour = entities[entityId];
+            var entityObserver = entityBehaviour.GetComponentInChildren<DebugEntityObserver>();
+            if (entityObserver != null) {
+                string name = describeEntity(entity);
+                entityObserver.nameText.text = name;
             }
         }
 
@@ -118,7 +168,6 @@ namespace Entitas.VisualDebugging.Unity {
 
         Transform createSystemPosition(int index) {
             var systemPositionObject = new GameObject();
-            systemPositionObject.name = "SystemPosition_" + index.ToString();
             var systemTransform = systemPositionObject.transform;
             systemTransform.SetParent(transform);
             systemTransform.localPosition = getCircularPosition(index);
@@ -129,17 +178,25 @@ namespace Entitas.VisualDebugging.Unity {
             return Quaternion.Euler(0f, 0f, nextPositionArc * index) * firstPositionOffset;
         }
 
-        void snapEntitiesToSystem(Dictionary<int, EntityBehaviour> entities, ISystem system) {
-            foreach (var behaviour in entities.Values) {
-                snapEntityToSystem(behaviour.entity, system);
+        void snapEntitiesToSystem(Dictionary<string, Dictionary<int, EntityBehaviour>> contextEntities, ISystem system) {
+            foreach (var entities in contextEntities.Values) {
+                foreach (var behaviour in entities.Values) {
+                    snapEntityToSystem(behaviour.entity, system);
+                }
             }
         }
 
         void snapEntityToSystem(IEntity entity, ISystem system) {
-            if (!_entities.ContainsKey(entity.creationIndex)) {
+            string contextName = entity.contextInfo.name;
+            if (!_contextEntities.ContainsKey(contextName)) {
+                _contextEntities[contextName] = new Dictionary<int, EntityBehaviour>();
+            }
+            int entityId = entity.creationIndex;
+            var entities = _contextEntities[contextName];
+            if (!entities.ContainsKey(entity.creationIndex)) {
                 createEntity(entity);
             }
-            var entityBehaviour = _entities[entity.creationIndex];
+            var entityBehaviour = entities[entityId];
             Transform systemTransform;
             if (system == null) {
                 systemTransform = nullSystemTransform;
@@ -152,18 +209,36 @@ namespace Entitas.VisualDebugging.Unity {
                 systemTransform = _systems[system].transform.parent;
                 var systemObserver = _systems[system];
                 systemObserver.Execute(system.ToString());
-                drawLine(entityBehaviour.transform, systemTransform);
             }
-            entityBehaviour.name = entity.ToString();
-            entityBehaviour.transform.SetParent(systemTransform, false);
+            move(entityBehaviour.transform, systemTransform, system != null);
             var entityObserver = entityBehaviour.GetComponentInChildren<DebugEntityObserver>();
             if (entityObserver != null) {
-                entityObserver.Execute(entity.ToString());
+                string name = describeEntity(entity);
+                entityObserver.Execute(name);
             }
+        }
+
+        // Disables trail if moving from absolute origin.
+        void move(Transform from, Transform to, bool isDrawingLine) {
+            isDrawingLine &= from.position != Vector3.zero;
+            if (isDrawingLine) {
+                drawLine(from, to);
+            }
+            else {
+                var trail = from.GetComponentInChildren<TrailRenderer>();
+                if (trail != null) {
+                    trail.Clear();
+                }
+            }
+            from.SetParent(to, false);
         }
 
         void drawLine(Transform from, Transform to) {
             Debug.DrawLine(from.position, to.position, systemConnectorColor, systemConnectorDuration);
+        }
+
+        private static string describeEntity(IEntity entity) {
+            return entity.contextInfo.name + "." + entity.ToString();
         }
     }
 }
