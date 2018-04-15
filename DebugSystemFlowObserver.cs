@@ -10,6 +10,9 @@ namespace Entitas.VisualDebugging.Unity {
         public GameObject systemPrefab;
         public GameObject entityPrefab;
 
+        public Color systemConnectorColor = Color.green;
+        public float systemConnectorDuration = float.MaxValue;
+
         [Header("If not enough system positions, offset and rotation lays out circle")]
         public Vector3 firstPositionOffset = new Vector3(0f, 5f, 0f);
         public float nextPositionArc = -15f;
@@ -136,6 +139,7 @@ namespace Entitas.VisualDebugging.Unity {
             if (!_entities.ContainsKey(entity.creationIndex)) {
                 createEntity(entity);
             }
+            var entityBehaviour = _entities[entity.creationIndex];
             Transform systemTransform;
             if (system == null) {
                 systemTransform = nullSystemTransform;
@@ -145,11 +149,21 @@ namespace Entitas.VisualDebugging.Unity {
                 {
                     init();
                 }
-                systemTransform = _systems[system].transform;
+                systemTransform = _systems[system].transform.parent;
                 var systemObserver = _systems[system];
-                systemObserver.Execute();
+                systemObserver.Execute(system.ToString());
+                drawLine(entityBehaviour.transform, systemTransform);
             }
-            _entities[entity.creationIndex].transform.position = systemTransform.position;
+            entityBehaviour.name = entity.ToString();
+            entityBehaviour.transform.SetParent(systemTransform, false);
+            var entityObserver = entityBehaviour.GetComponentInChildren<DebugEntityObserver>();
+            if (entityObserver != null) {
+                entityObserver.Execute(entity.ToString());
+            }
+        }
+
+        void drawLine(Transform from, Transform to) {
+            Debug.DrawLine(from.position, to.position, systemConnectorColor, systemConnectorDuration);
         }
     }
 }

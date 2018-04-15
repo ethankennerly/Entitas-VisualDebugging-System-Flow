@@ -54,6 +54,7 @@ GameObject:
   - component: {fileID: 4877088128069788}
   - component: {fileID: 212013557100100242}
   - component: {fileID: 114398379444296434}
+  - component: {fileID: 95923728867201608}
   m_Layer: 0
   m_Name: DebugEntity
   m_TagString: Untagged
@@ -136,6 +137,23 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+--- !u!95 &95923728867201608
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1624491236969012}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: b544088beae86714fbc30463f50edad0, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
 --- !u!102 &102769468027639836
 TextMesh:
   serializedVersion: 3
@@ -169,6 +187,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   nameText: {fileID: 102769468027639836}
+  anim: {fileID: 95923728867201608}
+  executedState: Executed
 --- !u!212 &212013557100100242
 SpriteRenderer:
   m_ObjectHideFlags: 1

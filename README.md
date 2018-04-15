@@ -1,5 +1,9 @@
 # Entitas Visual Debugging - System Flow
 
+## Demo
+
+Install Deadly Diver and walkthrough the example flow below.
+
 ## Design
 
 Everyone,
@@ -56,7 +60,7 @@ What ideas do you have to quickly and automatically visualize the relationships 
 
 ### Usage
 
-1. [ ] In the Unity editor, engineer plays.  Entitas visual debugging is disabled outside the editor.
+1. [x] In the Unity editor, engineer plays.  Entitas visual debugging is disabled outside the editor.
     1. [x] Debug system flow observer does not destroy on load.
     1. [x] Debug system flow observer moves debug systems behaviour to not destroy on load.
     1. [x] Debug system flow observer constructs a game object for each terminal system.
@@ -66,23 +70,16 @@ What ideas do you have to quickly and automatically visualize the relationships 
         1. [x] Each system is translucent by playing an animation, which represents the system has not been executed yet.
         1. [x] Flow observer searches through debug systems for systems.
             1. [x] For each system, observer adds event to the collector's groups.
-    1. [ ] In hierarchy window, engineer clicks `Debug System Flow Observer`.
+    1. [x] In hierarchy window, engineer clicks `Debug System Flow Observer`.
         1. [x] Entitas entity game objects are located at "No System".
         1. [x] Engineer plays game and triggers a system to execute an entity.  For example in Deadly Diver, click a location on screen.
             1. [x] Debug system flow observer moves entity game object to the system game objects.
             1. [x] Debug system makes system sprite opaque by playing an animation.
             1. [x] Over time, system animation gradually fades.
-            1. [ ] Similarly, entity animates when executed.
-            1. [ ] Debug system flow observer draws debug line with two halves.
+            1. [x] Likewise, entity animates when executed.
+            1. [x] System observer acquires entity behaviour as parent.
+            1. [x] Debug system flow observer draws debug line from entity's current position to system.
             1. [ ] Debug system writes on line near destination the name of the entity at the time of transition.
-    1. [ ] Engineer edits positions of systems to read the diagram.
-        1. [ ] Lines redraw to new positions.
-        1. [ ] Texts snap to new positions.
-        1. [ ] Engineer selects menu `Tools / Entitas / Visual Debugging / System Flow / Save Prefab`
-        1. [ ] Engineer adds and removes systems.
-        1. [ ] Next time, those systems will appear at those locations.
-        1. [ ] Removed systems disappear and are skipped.
-        1. [ ] Overflowing systems are added downscreen from last system.
 
 
 Coding style follows Entitas-CSharp.
