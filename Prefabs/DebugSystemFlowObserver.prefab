@@ -55,8 +55,9 @@ MonoBehaviour:
     type: 2}
   entityPrefab: {fileID: 1624491236969012, guid: 5a87da8faa6c1a5428046c958b496a58,
     type: 2}
-  systemConnectorColor: {r: 0.7352941, g: 0.7352941, b: 1, a: 1}
+  systemConnectorColor: {r: 0.17647058, g: 0.17647058, b: 1, a: 1}
   systemConnectorDuration: 3.4028235e+38
+  reparentsEntityToSystem: 1
   firstPositionOffset: {x: 0, y: 3, z: 0}
   nextPositionArc: -15
   systemPositions: []

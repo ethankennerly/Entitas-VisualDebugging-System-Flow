@@ -13,6 +13,8 @@ namespace Entitas.VisualDebugging.Unity {
         public Color systemConnectorColor = Color.green;
         public float systemConnectorDuration = float.MaxValue;
 
+        public bool reparentsEntityToSystem = false;
+
         [Header("If not enough system positions, offset and rotation lays out circle")]
         public Vector3 firstPositionOffset = new Vector3(0f, 5f, 0f);
         public float nextPositionArc = -15f;
@@ -230,7 +232,12 @@ namespace Entitas.VisualDebugging.Unity {
                     trail.Clear();
                 }
             }
-            from.SetParent(to, false);
+            if (reparentsEntityToSystem) {
+                from.SetParent(to, false);
+            }
+            else {
+                from.position = to.position;
+            }
         }
 
         void drawLine(Transform from, Transform to) {

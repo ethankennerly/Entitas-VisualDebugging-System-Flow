@@ -56,6 +56,7 @@ What ideas do you have to quickly and automatically visualize the relationships 
             1. [x] The entity prefab has Unity text mesh linking its name.
         1. [x] Engineer may use text mesh and world space instead of canvas for faster performance.
         1. [x] Engineer links system positions as many as are needed, manually placing them.
+        1. [x] Select if the entity will be reparented to the system object.
     1. Engineer saves scene.
 
 ### Usage
@@ -77,7 +78,7 @@ What ideas do you have to quickly and automatically visualize the relationships 
             1. [x] Debug system makes system sprite opaque by playing an animation.
             1. [x] Over time, system animation gradually fades.
             1. [x] Likewise, entity animates when executed.
-            1. [x] System observer acquires entity behaviour as parent.
+            1. [x] Optionally, system observer acquires entity behaviour as parent.
             1. [x] Debug system flow observer draws debug line from entity's current position to system.
             1. [x] Distinguishes between entities of differing contexts.
             1. [ ] Debug system writes on line near destination the name of the entity at the time of transition.
