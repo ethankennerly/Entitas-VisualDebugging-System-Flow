@@ -105,9 +105,9 @@ What ideas do you have to quickly and automatically visualize the relationships 
             1. [x] Trail renderer on debug entity prefab displays in which systems processed the entity.
             1. [x] Optionally, does not draw system connectors in case systems are replaced.
             1. [x] Distinguishes between entities of differing contexts.
-            1. [ ] Slightly offset each entity's position to prevent a total eclipse.
-            1. [ ] As entity moves, bring it forward towards the camera, so newest entity is on top.
-            1. [ ] Logs in a list of strings on debug entity observer the systems that had processed.
+            1. [x] Slightly offset each entity's position to prevent a total eclipse.
+            1. [x] Logs in a list of strings on debug entity observer the systems that had processed.
+            1. [x] Optionally, as entity moves, bring it forward towards the camera, so newest entity is on top.
 
 
 Coding style follows Entitas-CSharp.

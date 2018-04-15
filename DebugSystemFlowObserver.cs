@@ -24,6 +24,10 @@ namespace Entitas.VisualDebugging.Unity {
         public Vector3 entityPositionOffset = new Vector3(0f, 0.05f, 0f);
         public float nextEntityArc = -14f;
 
+        [Header("Moves toward camera. Eventually may go behind camera.")]
+        public float zStepOnEntitySnapped = -0.0000001f;
+        private int _numSnaps = 0;
+
         public Transform[] systemPositions;
 
 // Retains and loads serialized data outside of debugging.
@@ -84,9 +88,8 @@ namespace Entitas.VisualDebugging.Unity {
             var observerObject = Instantiate(entityPrefab, behaviour.transform);
             var observer = observerObject.GetComponent<DebugEntityObserver>();
             if (observer != null) {
-                string name = describeEntity(entity);
-                observer.name = name;
-                observer.nameText.text = name;
+                string entityName = describeEntity(entity);
+                observer.SetName(entityName);
             }
             entity.OnDestroyEntity -= _onDestroyEntity;
             entity.OnDestroyEntity += _onDestroyEntity;
@@ -128,8 +131,8 @@ namespace Entitas.VisualDebugging.Unity {
             var entityBehaviour = entities[entityId];
             var entityObserver = entityBehaviour.GetComponentInChildren<DebugEntityObserver>();
             if (entityObserver != null) {
-                string name = describeEntity(entity);
-                entityObserver.nameText.text = name;
+                string entityName = describeEntity(entity);
+                entityObserver.SetName(entityName);
             }
         }
 
@@ -235,9 +238,12 @@ namespace Entitas.VisualDebugging.Unity {
             if (entityBehaviour == null) {
                 return;
             }
+            string entityName = describeEntity(entity);
+            string systemName;
             Transform systemTransform;
             if (system == null) {
                 systemTransform = nullSystemTransform;
+                systemName = null;
             }
             else {
                 if (!_systems.ContainsKey(system)) {
@@ -246,14 +252,18 @@ namespace Entitas.VisualDebugging.Unity {
                 }
                 systemTransform = _systems[system].transform.parent;
                 var systemObserver = _systems[system];
-                systemObserver.Execute(system.ToString());
+                systemName = system.ToString();
+                systemObserver.Execute(systemName);
+                systemObserver.Log(entityName);
             }
             move(entityBehaviour.transform, systemTransform, system != null);
-            entityBehaviour.transform.position = systemTransform.position + getEntityCircularPosition(entityId);
+            entityBehaviour.transform.position = systemTransform.position + getEntityCircularPosition(entityId)
+                + new Vector3(0f, 0f, zStepOnEntitySnapped * _numSnaps);
+            _numSnaps++;
             var entityObserver = entityBehaviour.GetComponentInChildren<DebugEntityObserver>();
             if (entityObserver != null) {
-                string name = describeEntity(entity);
-                entityObserver.Execute(name);
+                entityObserver.Execute(entityName);
+                entityObserver.Log(systemName);
             }
         }
 
@@ -283,8 +293,11 @@ namespace Entitas.VisualDebugging.Unity {
             Debug.DrawLine(from.position, to.position, systemConnectorColor, systemConnectorDuration);
         }
 
+        /// Removes reference count, which triggers false-positives for meaningful changes.
         private static string describeEntity(IEntity entity) {
-            return entity.contextInfo.name + "." + entity.ToString();
+            string entityName = entity.ToString();
+            string[] parts = entityName.Split('(');
+            return entity.contextInfo.name + '.' + parts[0] + '(' + parts[2];
         }
 #endif
     }
