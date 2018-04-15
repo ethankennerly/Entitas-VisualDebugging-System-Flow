@@ -10,6 +10,7 @@ namespace Entitas.VisualDebugging.Unity {
         public GameObject systemPrefab;
         public GameObject entityPrefab;
 
+        public bool drawsSystemConnector = false;
         public Color systemConnectorColor = Color.green;
         public float systemConnectorDuration = float.MaxValue;
 
@@ -17,10 +18,16 @@ namespace Entitas.VisualDebugging.Unity {
 
         [Header("If not enough system positions, offset and rotation lays out circle")]
         public Vector3 firstPositionOffset = new Vector3(0f, 5f, 0f);
-        public float nextPositionArc = -15f;
+        public float nextPositionArc = -4f;
+
+        [Header("Entities circle around offset from center")]
+        public Vector3 entityPositionOffset = new Vector3(0f, 0.05f, 0f);
+        public float nextEntityArc = -14f;
 
         public Transform[] systemPositions;
 
+// Retains and loads serialized data outside of debugging.
+#if (!ENTITAS_DISABLE_VISUAL_DEBUGGING && UNITY_EDITOR)
         // Caches delegate to avoid garbage each call.
         SystemEntityWillBeExecuted _snapEntityToSystem;
 
@@ -42,6 +49,8 @@ namespace Entitas.VisualDebugging.Unity {
 
         void OnDestroy() {
             ObservableSystem.OnEntityWillBeExecuted -= _snapEntityToSystem;
+            _contextEntities.Clear();
+            _systems.Clear();
         }
 
         void init() {
@@ -87,6 +96,7 @@ namespace Entitas.VisualDebugging.Unity {
             entity.OnComponentRemoved += _onEntityChanged;
         }
 
+        // Context observer already destroys behaviour, so no need to destroy that.
         void destroyEntity(IEntity entity) {
             string contextName = entity.contextInfo.name;
             if (!_contextEntities.ContainsKey(contextName)) {
@@ -97,7 +107,7 @@ namespace Entitas.VisualDebugging.Unity {
             if (entities.ContainsKey(entityId)) {
                 var behaviour = entities[entityId];
                 entities.Remove(entityId);
-                Destroy(behaviour.gameObject);
+                // Destroy(behaviour.gameObject);
             }
         }
 
@@ -112,6 +122,9 @@ namespace Entitas.VisualDebugging.Unity {
             }
             int entityId = entity.creationIndex;
             var entities = _contextEntities[contextName];
+            if (!entities.ContainsKey(entityId)) {
+                return;
+            }
             var entityBehaviour = entities[entityId];
             var entityObserver = entityBehaviour.GetComponentInChildren<DebugEntityObserver>();
             if (entityObserver != null) {
@@ -142,15 +155,26 @@ namespace Entitas.VisualDebugging.Unity {
                 var systemInfo = systemInfos[index];
                 systems[index] = systemInfo.system;
             }
-            if (count1 >= systemPositions.Length) {
-                Array.Resize(ref systemPositions, count1);
+            createSystems(systems, 0, count1);
+        }
+
+        void addSystem(ISystem system) {
+            createSystems(new ISystem[]{system}, systemPositions.Length, systemPositions.Length + 1);
+        }
+
+        void createSystems(ISystem[] systems, int start, int count) {
+            if (count >= systemPositions.Length) {
+                Array.Resize(ref systemPositions, count);
             }
-            for (int index = 0; index < count1; ++index) {
+            for (int index = start; index < count; ++index) {
                 if (systemPositions[index] == null) {
                     systemPositions[index] = createSystemPosition(index);
                 }
                 var systemPosition = systemPositions[index];
-                var system = systems[index];
+                var system = systems[index - start];
+                if (system != null && _systems.ContainsKey(system)) {
+                    continue;
+                }
                 var observerObject = Instantiate(systemPrefab, systemPosition);
                 var observer = observerObject.GetComponent<DebugSystemObserver>();
                 if (observer != null) {
@@ -172,12 +196,16 @@ namespace Entitas.VisualDebugging.Unity {
             var systemPositionObject = new GameObject();
             var systemTransform = systemPositionObject.transform;
             systemTransform.SetParent(transform);
-            systemTransform.localPosition = getCircularPosition(index);
+            systemTransform.localPosition = getSystemCircularPosition(index);
             return systemTransform;
         }
 
-        Vector3 getCircularPosition(int index) {
+        Vector3 getSystemCircularPosition(int index) {
             return Quaternion.Euler(0f, 0f, nextPositionArc * index) * firstPositionOffset;
+        }
+
+        Vector3 getEntityCircularPosition(int index) {
+            return Quaternion.Euler(0f, 0f, nextEntityArc * index) * entityPositionOffset;
         }
 
         void snapEntitiesToSystem(Dictionary<string, Dictionary<int, EntityBehaviour>> contextEntities, ISystem system) {
@@ -195,24 +223,33 @@ namespace Entitas.VisualDebugging.Unity {
             }
             int entityId = entity.creationIndex;
             var entities = _contextEntities[contextName];
-            if (!entities.ContainsKey(entity.creationIndex)) {
+            if (!entities.ContainsKey(entityId)) {
                 createEntity(entity);
+                if (!entities.ContainsKey(entityId)) {
+                    Debug.LogWarning("DebugSystemFlowObserver.snapEntityToSystem: entity observer not created for " + entity);
+                    return;
+                }
             }
+
             var entityBehaviour = entities[entityId];
+            if (entityBehaviour == null) {
+                return;
+            }
             Transform systemTransform;
             if (system == null) {
                 systemTransform = nullSystemTransform;
             }
             else {
-                if (!_systems.ContainsKey(system))
-                {
-                    init();
+                if (!_systems.ContainsKey(system)) {
+                    Debug.Log("DebugSystemFlowObserver.snapEntityToSystem: " + system.ToString() + " is not in systems. Adding that system now.");
+                    addSystem(system);
                 }
                 systemTransform = _systems[system].transform.parent;
                 var systemObserver = _systems[system];
                 systemObserver.Execute(system.ToString());
             }
             move(entityBehaviour.transform, systemTransform, system != null);
+            entityBehaviour.transform.position = systemTransform.position + getEntityCircularPosition(entityId);
             var entityObserver = entityBehaviour.GetComponentInChildren<DebugEntityObserver>();
             if (entityObserver != null) {
                 string name = describeEntity(entity);
@@ -220,11 +257,13 @@ namespace Entitas.VisualDebugging.Unity {
             }
         }
 
-        // Disables trail if moving from absolute origin.
+        /// Disables trail if moving from absolute origin.
         void move(Transform from, Transform to, bool isDrawingLine) {
             isDrawingLine &= from.position != Vector3.zero;
             if (isDrawingLine) {
-                drawLine(from, to);
+                if (drawsSystemConnector) {
+                    drawLine(from, to);
+                }
             }
             else {
                 var trail = from.GetComponentInChildren<TrailRenderer>();
@@ -247,5 +286,6 @@ namespace Entitas.VisualDebugging.Unity {
         private static string describeEntity(IEntity entity) {
             return entity.contextInfo.name + "." + entity.ToString();
         }
+#endif
     }
 }

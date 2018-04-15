@@ -1,5 +1,9 @@
 # Entitas Visual Debugging - System Flow
 
+This prototype shows a flowchart of entities at systems while debugging in the Unity Editor.
+
+If you like it, feel free to run with it and improve it.
+
 ## Demo
 
 Install Deadly Diver and walkthrough the example flow below.
@@ -41,7 +45,25 @@ What ideas do you have to quickly and automatically visualize the relationships 
 1. Engineer programs a game using two or more reactive systems of Entitas.  Example:  see Deadly Diver <https://github.com/ethankennerly/ludumdare40>
 1. [x] Engineer installs this repo into their `Assets` path.  For example:  see Deadly Diver.
 1. [x] Engineer replaces text of `ReactiveSystem` with `ObservableReactiveSystem`.
-    1. [x] Engineer inserts call to base class execute:  `base.Execute(entities);`
+    1. [x] Example vim sed command.  Sed can also be run from the command line.
+
+            args **/*System.cs
+            argdo %s/\<ReactiveSystem\>/ObservableReactiveSystem/e | update
+
+    1. [x] To undo this, the substitute the reverse.  Example:
+
+            argdo %s/\<ObservableReactiveSystem\>/ReactiveSystem/e | update
+
+    1. [x] Engineer inserts call to base class execute:  `base.Execute(entities);`  Example vim sed command, if the indentation level is constant:
+
+            args **/*System.cs
+            argdo %s/\n/___NEW_LINE___/g | %s/\<Execute(List<[^>]*> \([A-Za-z]*\)[^{]*{/\0___NEW_LINE___            base.Execute(\1);/e | %s/___NEW_LINE___/\r/g | update
+
+        - Perl can do this more succinctly. <https://unix.stackexchange.com/questions/26284/how-can-i-use-sed-to-replace-a-multi-line-string?newreg=dc0a577fedd84de3a9f33424eccfcbb3>
+    1. [x] To undo if `base.Execute` is not used anywhere else is simpler:
+
+            argdo %s/  *base.Execute([^)]*);\n//e | update
+
         - An alternative implementation that would avoid the middleman class would be if Entitas implemented an `entity.OnEntityRetained` event.
         - When a reactive system executes an entity, the system retains the entity.
 1. [x] In the Unity editor, engineer drags prefab `DebugSystemFlowObserver` into the scene or creates one.
@@ -54,8 +76,9 @@ What ideas do you have to quickly and automatically visualize the relationships 
             1. [x] The system prefab has Unity text mesh linking its name.
         1. [x] Engineer assigns the entity prefab, which is how the system will appear.
             1. [x] The entity prefab has Unity text mesh linking its name.
+            1. [x] Trail renderer on debug entity prefab displays in which systems processed the entity.
         1. [x] Engineer may use text mesh and world space instead of canvas for faster performance.
-        1. [x] Engineer links system positions as many as are needed, manually placing them.
+        1. [x] Engineer optionally links system positions as many as are needed, manually placing them.
         1. [x] Select if the entity will be reparented to the system object.
     1. Engineer saves scene.
 
@@ -79,11 +102,12 @@ What ideas do you have to quickly and automatically visualize the relationships 
             1. [x] Over time, system animation gradually fades.
             1. [x] Likewise, entity animates when executed.
             1. [x] Optionally, system observer acquires entity behaviour as parent.
-            1. [x] Debug system flow observer draws debug line from entity's current position to system.
+            1. [x] Trail renderer on debug entity prefab displays in which systems processed the entity.
+            1. [x] Optionally, does not draw system connectors in case systems are replaced.
             1. [x] Distinguishes between entities of differing contexts.
-            1. [ ] Debug system writes on line near destination the name of the entity at the time of transition.
-            1. [ ] As entity moves, bring it forward towards the camera, so newest entity is on top.
             1. [ ] Slightly offset each entity's position to prevent a total eclipse.
+            1. [ ] As entity moves, bring it forward towards the camera, so newest entity is on top.
+            1. [ ] Logs in a list of strings on debug entity observer the systems that had processed.
 
 
 Coding style follows Entitas-CSharp.
